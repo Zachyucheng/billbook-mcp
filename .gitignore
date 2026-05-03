@@ -17,6 +17,9 @@
 # next.js (web build) — entire frontend is private
 /web/
 
+# development docs (kept local)
+/docs/
+
 # production build (desktop)
 /out/
 /build
