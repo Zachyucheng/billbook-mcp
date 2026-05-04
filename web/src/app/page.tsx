@@ -5,83 +5,23 @@ import { siteConfig } from "@/lib/site";
 import { BotIcon, UsersIcon, RecurringIcon, ChartIcon, LockIcon, MonitorIcon } from "@/components/feature-icons";
 import { BrandMark } from "@/components/brand-mark";
 
-/* ─── MCP Client SVG Icons (based on actual logos) ─── */
+/* ─── MCP Client Icons (placeholder removed) ─── */
 
-function OpenClawIcon() {
+function ClientIcon() {
   return (
     <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      {/* Three claw slashes — bear claw style */}
-      <path d="M16 8 C13 16 12 26 14 32" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-      <path d="M22 6 C20 16 20 28 22 34" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-      <path d="M28 10 C26 18 26 26 28 30" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function HermesIcon() {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      {/* Winged H — Nous Research purple */}
-      <path d="M11 10 L11 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-      <path d="M29 10 L29 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-      <path d="M11 20 L29 20" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-      {/* Left wing */}
-      <path d="M11 14 C5 14 3 8 7 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      {/* Right wing */}
-      <path d="M29 14 C35 14 37 8 33 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
-
-function ClaudeIcon() {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      {/* Three dots in ascending arch — Anthropic Claude orange */}
-      <circle cx="12" cy="26" r="4" fill="currentColor" />
-      <circle cx="20" cy="16" r="5.5" fill="currentColor" />
-      <circle cx="28" cy="24" r="4" fill="currentColor" />
-    </svg>
-  );
-}
-
-function CursorIcon() {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      {/* Mouse cursor pointer arrow */}
-      <path d="M6 6 L16 20 L11 20 L6 30 Z" fill="currentColor" />
-      <path d="M16 20 L30 30 L22 22 Z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function ContinueIcon() {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      {/* Circle + play chevron — Continue indigo */}
-      <circle cx="20" cy="20" r="16" fill="currentColor" opacity="0.15" />
-      <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="2" />
-      <polyline points="15,12 26,20 15,28" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" className="h-10 w-10">
-      <circle cx="14" cy="20" r="2.5" fill="currentColor" />
-      <circle cx="20" cy="20" r="2.5" fill="currentColor" />
-      <circle cx="26" cy="20" r="2.5" fill="currentColor" />
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
 
 const clients = [
-  { name: "OpenClaw", desc: "开源 MCP 客户端", icon: OpenClawIcon },
-  { name: "Hermes Agent", desc: "AI Agent MCP 客户端", icon: HermesIcon },
-  { name: "Claude Desktop", desc: "Anthropic 桌面应用", icon: ClaudeIcon },
-  { name: "Cursor", desc: "AI 代码编辑器", icon: CursorIcon },
-  { name: "Continue.dev", desc: "开源 AI 助手", icon: ContinueIcon },
-  { name: "…更多客户端", desc: "任意支持 stdio MCP 的应用", icon: MoreIcon },
+  { name: "OpenClaw", desc: "开源 MCP 客户端", icon: ClientIcon },
+  { name: "Hermes Agent", desc: "AI Agent MCP 客户端", icon: ClientIcon },
+  { name: "Claude Desktop", desc: "Anthropic 桌面应用", icon: ClientIcon },
+  { name: "Cursor", desc: "AI 代码编辑器", icon: ClientIcon },
+  { name: "Continue.dev", desc: "开源 AI 助手", icon: ClientIcon },
+  { name: "…更多客户端", desc: "任意支持 stdio MCP 的应用", icon: ClientIcon },
 ];
 
 const features = [
