@@ -23,6 +23,7 @@
 /web/src/lib/site.ts
 /web/out/
 /web/.next/
+/web/.wrangler/
 
 # development docs (kept local)
 /docs/

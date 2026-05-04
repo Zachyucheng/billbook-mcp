@@ -2,7 +2,23 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { configureAnalyticsPresentation } from "@/lib/analytics";
-import { AuthSession } from "@/lib/auth";
+type AccountStatus = "active" | "disabled";
+
+type AuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: AccountStatus;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt: string | null;
+};
+
+type AuthSession = {
+  user: AuthUser;
+  expiresAt: string;
+};
 import {
   downloadWorkspaceBackup,
   downloadWorkspaceExport,

@@ -2,12 +2,5 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "billbook",
   "pages_build_output_dir": "./out",
-  "compatibility_date": "2026-05-01",
-  "d1_databases": [
-    {
-      "binding": "AUTH_DB",
-      "database_name": "billbook",
-      "database_id": "391a1321-67ea-4bb8-b06c-98f041fc70d3"
-    }
-  ]
+  "compatibility_date": "2026-05-01"
 }

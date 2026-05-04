@@ -154,10 +154,6 @@ h4 {
   background: var(--surface-solid);
 }
 
-.accent-wash {
-  background: var(--surface-strong);
-}
-
 .soft-ring {
   box-shadow:
     0 0 0 1px var(--accent-soft),
@@ -294,9 +290,8 @@ h4 {
   display: none;
 }
 
-.stat-strip {
-  display: grid;
-  gap: 12px;
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .content-auto-block {
