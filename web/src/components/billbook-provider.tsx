@@ -208,6 +208,8 @@ export function BillbookProvider({
   const [hydrated, setHydrated] = useState(false);
   const desktopSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastDesktopSyncFingerprintRef = useRef<string | null>(null);
+  const lastSqliteSyncedAtRef = useRef<string | null>(null);
+  const sqlitePollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const currentUser = authSession
     ? toTeamMember(authSession.user, state.teamMembers)
@@ -225,6 +227,69 @@ export function BillbookProvider({
     document.documentElement.lang = state.preferences.language;
   }, [state.preferences.currency, state.preferences.language, state.preferences.theme]);
 
+  /** Reload state from SQLite — used by refreshFromSqlite, sync guard, and poll */
+  const doRefreshFromSqlite = useCallback(async () => {
+    if (typeof window === "undefined" || !window.billbookDesktop) return;
+    try {
+      const sqliteState = await window.billbookDesktop.readWorkspaceState();
+      if (sqliteState && typeof sqliteState === "object") {
+        const normalized = normalizeWorkspace(
+          sqliteState as BillbookState,
+          authSession,
+          localPreferences,
+        );
+        setState(normalized);
+        writeLocalLedger(authSession?.user.id ?? "guest", normalized);
+        const status = await window.billbookDesktop?.getDatabaseStatus();
+        if (status?.syncedAt) {
+          lastSqliteSyncedAtRef.current = status.syncedAt;
+        }
+        const payload = createDesktopWorkspaceSyncPayload(normalized, currentUser);
+        lastDesktopSyncFingerprintRef.current = JSON.stringify(payload);
+      }
+    } catch (e) {
+      console.error("Failed to refresh from SQLite:", e);
+    }
+  }, [authSession, currentUser, localPreferences]);
+
+  const refreshFromSqlite = useCallback(async () => {
+    await doRefreshFromSqlite();
+  }, [doRefreshFromSqlite]);
+
+  // 30s poll: detect SQLite updates from MCP and refresh automatically
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.billbookDesktop || !hydrated) {
+      return;
+    }
+    const poll = async () => {
+      try {
+        const status = await window.billbookDesktop?.getDatabaseStatus();
+        if (
+          status?.syncedAt &&
+          lastSqliteSyncedAtRef.current &&
+          new Date(status.syncedAt).getTime() > new Date(lastSqliteSyncedAtRef.current).getTime()
+        ) {
+          await doRefreshFromSqlite();
+        }
+        // First run: set baseline
+        if (status?.syncedAt && !lastSqliteSyncedAtRef.current) {
+          lastSqliteSyncedAtRef.current = status.syncedAt;
+        }
+      } catch {
+        // ignore poll errors
+      }
+    };
+    void poll();
+    sqlitePollTimerRef.current = setInterval(poll, 30000);
+    return () => {
+      if (sqlitePollTimerRef.current) {
+        clearInterval(sqlitePollTimerRef.current);
+        sqlitePollTimerRef.current = null;
+      }
+    };
+  }, [hydrated, doRefreshFromSqlite]);
+
+  // Guarded UI→SQLite sync: only push if SQLite isn't newer than our last load
   useEffect(() => {
     if (
       typeof window === "undefined" ||
@@ -246,7 +311,24 @@ export function BillbookProvider({
       clearTimeout(desktopSyncTimerRef.current);
     }
 
-    desktopSyncTimerRef.current = setTimeout(() => {
+    desktopSyncTimerRef.current = setTimeout(async () => {
+      // Before pushing to SQLite, check if SQLite has newer data
+      try {
+        const status = await window.billbookDesktop?.getDatabaseStatus();
+        if (
+          status?.syncedAt &&
+          lastSqliteSyncedAtRef.current &&
+          new Date(status.syncedAt).getTime() > new Date(lastSqliteSyncedAtRef.current).getTime()
+        ) {
+          // SQLite is newer — pull instead of push
+          console.log("[billbook] SQLite is newer than renderer, refreshing from SQLite");
+          await doRefreshFromSqlite();
+          return;
+        }
+      } catch {
+        // fallthrough to push
+      }
+
       void window.billbookDesktop
         ?.syncWorkspace(payload)
         .then(() => {
@@ -263,7 +345,7 @@ export function BillbookProvider({
         desktopSyncTimerRef.current = null;
       }
     };
-  }, [authSession, currentUser, hydrated, state]);
+  }, [authSession, currentUser, hydrated, state, doRefreshFromSqlite]);
 
   const loadWorkspace = async (session: AuthSession) => {
     const nextLocalPreferences = readLocalPreferences(session.user.id);
@@ -283,6 +365,15 @@ export function BillbookProvider({
           );
           setState(normalized);
           writeLocalLedger(session.user.id, normalized);
+          // Track SQLite syncedAt so we can detect future changes
+          try {
+            const dbStatus = await window.billbookDesktop.getDatabaseStatus();
+            if (dbStatus?.syncedAt) {
+              lastSqliteSyncedAtRef.current = dbStatus.syncedAt;
+            }
+          } catch {
+            // ignore
+          }
           // 设置初始指纹，避免自动 sync 覆盖相同数据
           if (lastDesktopSyncFingerprintRef) {
             const initialPayload = createDesktopWorkspaceSyncPayload(
@@ -867,9 +958,7 @@ export function BillbookProvider({
             "更新工作区失败。",
           );
         },
-        refreshFromSqlite: async () => {
-          /* desktop-only: refresh from SQLite */
-        },
+        refreshFromSqlite,
       }}
     >
       {children}

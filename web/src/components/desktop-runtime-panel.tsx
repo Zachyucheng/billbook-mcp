@@ -24,7 +24,7 @@ type DesktopDatabaseStatus = {
 
 export function DesktopRuntimePanel() {
   const { t, lang } = useI18n();
-  const { state, currentUser } = useBillbook();
+  const { state, currentUser, refreshFromSqlite } = useBillbook();
   const [environment, setEnvironment] = useState<DesktopEnvironment | null>(null);
   const [databaseStatus, setDatabaseStatus] = useState<DesktopDatabaseStatus | null>(null);
   const [hermesAccess, setHermesAccess] = useState<boolean>(true);
@@ -97,14 +97,33 @@ export function DesktopRuntimePanel() {
                 {t["runtime.dbHint"]}
               </p>
             </div>
-            <button
-              type="button"
-              disabled={Boolean(busyAction)}
-              onClick={syncWorkspaceToDesktop}
-              className="ui-button btn-accent disabled:opacity-50"
-            >
-              {busyAction === "sync" ? t["runtime.syncing"] : t["runtime.syncBtn"]}
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={Boolean(busyAction)}
+                onClick={async () => {
+                  setBusyAction("refresh");
+                  try {
+                    await refreshFromSqlite();
+                    const status = (await window.billbookDesktop?.getDatabaseStatus()) ?? null;
+                    setDatabaseStatus(status);
+                  } finally {
+                    setBusyAction(null);
+                  }
+                }}
+                className="ui-button border border-[color:var(--line)] bg-[color:var(--surface)] disabled:opacity-50"
+              >
+                {busyAction === "refresh" ? "⟳" : "⟳ 从 SQLite 读入"}
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(busyAction)}
+                onClick={syncWorkspaceToDesktop}
+                className="ui-button btn-accent disabled:opacity-50"
+              >
+                {busyAction === "sync" ? t["runtime.syncing"] : t["runtime.syncBtn"]}
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[color:var(--line)] bg-[color:var(--surface-strong)] px-4 py-4">
